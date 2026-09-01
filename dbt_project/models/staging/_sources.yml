@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Camada bronze — dados brutos versionados, sem transformação de negócio.
+      Lidos diretamente dos arquivos Parquet gerados pelos scripts de ingestão.
+    meta:
+      layer: bronze
+    tables:
+      - name: anp_precos_semanal_revenda
+        description: "Série histórica semanal de preços de revenda (ANP), bruta."
+        meta:
+          external_location: "read_parquet('../data/bronze/anp_precos/fonte=semanal_revenda/**/*.parquet')"
+
+      - name: anp_precos_mensal_revenda
+        description: "Série histórica mensal de preços de revenda (ANP), bruta."
+        meta:
+          external_location: "read_parquet('../data/bronze/anp_precos/fonte=mensal_revenda/**/*.parquet')"
+
+      - name: anp_posto_revendedor
+        description: "Dados abertos por posto revendedor (ANP), brutos."
+        meta:
+          external_location: "read_parquet('../data/bronze/anp_precos/fonte=posto_revendedor/**/*.parquet')"
+
+      - name: ibge_municipios
+        description: "Tabela de referência de municípios do IBGE, bruta."
+        meta:
+          external_location: "read_parquet('../data/bronze/ibge_municipios/*.parquet')"

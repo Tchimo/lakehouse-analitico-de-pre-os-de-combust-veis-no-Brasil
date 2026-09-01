@@ -1,0 +1,29 @@
+# Dados (bronze/silver/gold não versionam — só código e amostras pequenas)
+data/bronze/*
+data/silver/*
+data/gold/*
+data/raw/*
+data/warehouse.duckdb
+!data/bronze/.gitkeep
+!data/raw/.gitkeep
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Ambiente
+.env
+
+# Prefect
+.prefect/
+
+# Editor
+.vscode/
+.idea/

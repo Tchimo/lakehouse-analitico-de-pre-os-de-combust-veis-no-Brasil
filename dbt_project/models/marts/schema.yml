@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: mart_preco_medio_uf_semanal
+    description: "Preço médio, mín, máx e desvio padrão por UF/produto/semana."
+    columns:
+      - name: uf_nome
+        tests:
+          - not_null
+      - name: produto
+        tests:
+          - not_null
+
+  - name: mart_dispersao_municipio
+    description: "Coeficiente de variação de preços por município — base do ranking de maior dispersão."
+    columns:
+      - name: codigo_ibge
+        tests:
+          - not_null
+
+  - name: mart_evolucao_temporal_produto
+    description: "Série temporal nacional de preço médio por produto — base do gráfico de série temporal."
+
+  - name: mart_margem_revenda_distribuicao
+    description: >
+      PLACEHOLDER — mart vazio até a fonte de preço de distribuição ser
+      ingerida (ver TODO no .sql do model). Estrutura de colunas já definida
+      para não quebrar dashboards que a referenciem antecipadamente.
+
+  - name: mart_top_anomalias
+    description: "Municípios com preço fora do padrão (|z-score| >= 2) por produto/semana."
+    columns:
+      - name: z_score
+        description: "Desvios-padrão de distância em relação à média do produto na semana."

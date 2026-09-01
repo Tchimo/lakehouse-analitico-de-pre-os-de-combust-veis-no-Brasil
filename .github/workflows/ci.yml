@@ -1,0 +1,60 @@
+name: CI - dbt build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Instalar pacotes dbt
+        working-directory: dbt_project
+        run: dbt deps --profiles-dir .
+
+      - name: dbt seed
+        working-directory: dbt_project
+        run: dbt seed --profiles-dir .
+
+      - name: dbt run (contra dados de amostra em fixtures/)
+        working-directory: dbt_project
+        run: dbt run --profiles-dir .
+
+      - name: dbt test
+        working-directory: dbt_project
+        run: dbt test --profiles-dir .
+
+      - name: Upload data quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-quality-report
+          path: docs/data_quality_report.md
+
+  scheduled-pipeline:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Rodar pipeline completo
+        run: python flows/pipeline_flow.py
+
+# Para agendar execução semanal (alinhada à publicação da ANP), adicione:
+# on:
+#   schedule:
+#     - cron: "0 9 * * 1"  # segundas-feiras, 09:00 UTC

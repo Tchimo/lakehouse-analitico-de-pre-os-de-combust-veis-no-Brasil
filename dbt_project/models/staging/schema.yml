@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: stg_ibge_municipios
+    description: "Municípios do IBGE normalizados, base de referência geográfica."
+    columns:
+      - name: codigo_ibge
+        description: "Código oficial do município (7 dígitos)."
+        tests:
+          - unique
+          - not_null
+      - name: nome_municipio_normalizado
+        description: "Nome do município sem acentos, minúsculo — chave de join."
+        tests:
+          - not_null
+      - name: uf_sigla
+        description: "Sigla da UF (2 letras)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT',
+                       'MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO',
+                       'RR','SC','SP','SE','TO']
+
+  - name: stg_anp_precos_semanal
+    description: "Série semanal de preços de revenda de combustíveis, normalizada."
+    columns:
+      - name: data_inicial
+        tests:
+          - not_null
+      - name: produto
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['GASOLINA COMUM', 'ETANOL HIDRATADO', 'DIESEL S10',
+                       'DIESEL S500', 'GLP', 'GNV']
+              config:
+                severity: warn   # ANP às vezes muda o rótulo do produto — avisa, não quebra o build
+      - name: preco_medio_revenda
+        description: "Preço médio de revenda em R$."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 20
+              config:
+                severity: warn
+
+  - name: int_anp_geo_resolvido
+    description: >
+      Preços da ANP com código IBGE resolvido via join direto ou dicionário
+      de exceções. Ponto central de monitoramento de qualidade geográfica.
+    columns:
+      - name: codigo_ibge
+        description: "Código IBGE resolvido (pode ser nulo se não resolvido)."
+      - name: municipio_nao_resolvido
+        description: "true quando não foi possível resolver o município via nenhuma estratégia."
+    # Teste de taxa de match geográfico definido como teste singular em
+    # tests/assert_geo_match_rate.sql (falha se >2% dos registros não
+    # resolverem município — ver arquivo para o threshold).
+
+seeds:
+  - name: municipio_exceptions
+    description: >
+      Dicionário curado manualmente de nomes de município da ANP que não
+      batem diretamente com o nome oficial do IBGE (grafia, abreviação,
+      mudança histórica de nome). Alimentado incrementalmente conforme
+      novos casos de não-match são encontrados.
+    columns:
+      - name: nome_anp_normalizado
+        tests:
+          - not_null
+      - name: codigo_ibge
+        tests:
+          - not_null

@@ -1,0 +1,53 @@
+version: "3.9"
+
+# Lakehouse de Preços de Combustíveis (ANP)
+# DuckDB roda embutido (não precisa de container próprio) — os containers aqui
+# cuidam de orquestração (Prefect) e visualização (Metabase).
+# O DuckDB fica em um arquivo compartilhado via volume: ./data/warehouse.duckdb
+
+services:
+  prefect-server:
+    image: prefecthq/prefect:2-python3.11
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"
+    volumes:
+      - prefect-data:/root/.prefect
+    environment:
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - prefect-server
+    environment:
+      - PREFECT_API_URL=http://prefect-server:4200/api
+      - DUCKDB_PATH=/app/data/warehouse.duckdb
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+    working_dir: /app
+    command: ["python", "flows/pipeline_flow.py"]
+
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+      - metabase-data:/metabase-data
+    environment:
+      - MB_DB_FILE=/metabase-data/metabase.db
+    depends_on:
+      - pipeline
+
+volumes:
+  prefect-data:
+  metabase-data:
