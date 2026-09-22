@@ -1,4 +1,3 @@
-version: "3.9"
 
 # Lakehouse de Preços de Combustíveis (ANP)
 # DuckDB roda embutido (não precisa de container próprio) — os containers aqui
@@ -42,6 +41,7 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/data
+      - ./metabase-plugins:/plugins
       - metabase-data:/metabase-data
     environment:
       - MB_DB_FILE=/metabase-data/metabase.db

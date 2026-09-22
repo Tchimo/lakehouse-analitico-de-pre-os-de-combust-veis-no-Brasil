@@ -4,7 +4,7 @@ models:
   - name: mart_preco_medio_uf_semanal
     description: "Preço médio, mín, máx e desvio padrão por UF/produto/semana."
     columns:
-      - name: uf_nome
+      - name: uf_sigla
         tests:
           - not_null
       - name: produto

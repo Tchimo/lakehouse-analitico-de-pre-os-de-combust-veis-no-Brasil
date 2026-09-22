@@ -4,7 +4,7 @@ fuel_lakehouse:
     dev:
       type: duckdb
       path: "{{ env_var('DUCKDB_PATH', '../data/warehouse.duckdb') }}"
-      threads: 4
+      threads: 1
       extensions:
         - httpfs
         - parquet
