@@ -20,6 +20,7 @@ venv/
 
 # Ambiente
 .env
+.env.*
 
 # Prefect
 .prefect/
@@ -27,3 +28,12 @@ venv/
 # Editor
 .vscode/
 .idea/
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos grandes/binários
+*.jar
